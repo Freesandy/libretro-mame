@@ -1,4 +1,4 @@
-// license:GPL-2.0+
+// license:BSD-3-Clause
 // copyright-holders:Couriersud
 
 #ifndef PENUM_H_
@@ -9,8 +9,6 @@
 ///
 
 #include "pstring.h"
-#include "pstrutil.h"
-#include "putil.h"
 
 namespace plib
 {
@@ -45,6 +43,7 @@ namespace plib
 		pstring name() const { \
 			return nthstr(m_v, strings()); \
 		} \
+		template <typename S> void save_state(S &saver) { saver.save_item(m_v, "m_v"); } \
 		private: E m_v; \
 		static pstring strings() {\
 			static const char * lstrings = # __VA_ARGS__; \

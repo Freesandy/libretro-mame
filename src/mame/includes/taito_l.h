@@ -11,7 +11,7 @@
 #include "machine/timer.h"
 #include "machine/upd4701.h"
 #include "sound/msm5205.h"
-#include "sound/2203intf.h"
+#include "sound/ym2203.h"
 #include "emupal.h"
 #include "tilemap.h"
 
@@ -22,9 +22,8 @@ public:
 	taitol_state(const machine_config &mconfig, device_type type, const char *tag)
 		: driver_device(mconfig, type, tag)
 		, m_main_cpu(*this, "maincpu")
-		, m_vdp(*this, "tc0090lvc")
 		, m_upd4701(*this, "upd4701")
-		, m_main_prg(*this, "tc0090lvc")
+		, m_main_prg(*this, "maincpu")
 	{
 	}
 
@@ -37,10 +36,7 @@ public:
 protected:
 	/* misc */
 	int m_last_irq_level;
-	int m_main_high;
-
 	void irq_enable_w(u8 data);
-	void rombankswitch_w(u8 data);
 
 	void mcu_control_w(u8 data);
 	u8 mcu_control_r();
@@ -54,10 +50,9 @@ protected:
 	virtual void state_register();
 	virtual void taito_machine_reset();
 
-	required_device<cpu_device>                       m_main_cpu;
-	required_device<tc0090lvc_device>                 m_vdp;
-	optional_device<upd4701_device>                   m_upd4701;
-	required_memory_region                            m_main_prg;
+	required_device<tc0090lvc_device> m_main_cpu;
+	optional_device<upd4701_device>   m_upd4701;
+	required_memory_region            m_main_prg;
 };
 
 
@@ -104,7 +99,6 @@ public:
 		, m_slave_prg(*this, "slave")
 		, m_slave_bnk(*this, "slavebank")
 		, m_slave_rombank(0)
-		, m_slave_high(0)
 	{
 	}
 
@@ -126,7 +120,6 @@ protected:
 	required_memory_bank        m_slave_bnk;
 
 	u8  m_slave_rombank;
-	u8  m_slave_high;
 };
 
 
@@ -199,7 +192,6 @@ protected:
 	virtual void state_register() override;
 	virtual void taito_machine_reset() override;
 
-	void cachat_map(address_map &map);
 	void palamed_map(address_map &map);
 	void plotting_map(address_map &map);
 	void puzznic_map(address_map &map);

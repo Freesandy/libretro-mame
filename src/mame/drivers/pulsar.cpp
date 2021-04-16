@@ -58,6 +58,7 @@ public:
 		, m_maincpu(*this, "maincpu")
 		, m_rom(*this, "maincpu")
 		, m_ram(*this, "mainram")
+		, m_bank1(*this, "bank1")
 		, m_fdc (*this, "fdc")
 		, m_floppy0(*this, "fdc:0")
 		, m_floppy1(*this, "fdc:1")
@@ -78,12 +79,12 @@ private:
 	void io_map(address_map &map);
 	void mem_map(address_map &map);
 
-	bool m_rom_in_map;
 	floppy_image_device *m_floppy;
 	memory_passthrough_handler *m_rom_shadow_tap;
 	required_device<z80_device> m_maincpu;
 	required_region_ptr<u8> m_rom;
 	required_shared_ptr<u8> m_ram;
+	required_memory_bank    m_bank1;
 	required_device<fd1797_device> m_fdc;
 	required_device<floppy_connector> m_floppy0;
 	required_device<floppy_connector> m_floppy1;
@@ -93,7 +94,7 @@ private:
 void pulsar_state::mem_map(address_map &map)
 {
 	map(0x0000, 0xffff).ram().share("mainram");
-	map(0xf800, 0xffff).lr8(NAME([this] (offs_t offset) { if(m_rom_in_map) return m_rom[offset]; else return m_ram[offset+0xf800]; }));
+	map(0xf800, 0xffff).bankr("bank1");
 }
 
 void pulsar_state::io_map(address_map &map)
@@ -141,7 +142,7 @@ void pulsar_state::ppi_pb_w(u8 data)
 	m_rtc->read_w(BIT(data, 4));
 	m_rtc->write_w(BIT(data, 5));
 	m_rtc->hold_w(BIT(data, 6));
-	m_rom_in_map = BIT(data, 7);
+	m_bank1->set_entry(BIT(data, 7));
 }
 
 // d0..d3 Data lines to rtc
@@ -168,7 +169,6 @@ static const z80_daisy_config daisy_chain_intf[] =
 static DEVICE_INPUT_DEFAULTS_START( terminal )
 	DEVICE_INPUT_DEFAULTS( "RS232_TXBAUD", 0xff, RS232_BAUD_9600 )
 	DEVICE_INPUT_DEFAULTS( "RS232_RXBAUD", 0xff, RS232_BAUD_9600 )
-	DEVICE_INPUT_DEFAULTS( "RS232_STARTBITS", 0xff, RS232_STARTBITS_1 )
 	DEVICE_INPUT_DEFAULTS( "RS232_DATABITS", 0xff, RS232_DATABITS_7 )
 	DEVICE_INPUT_DEFAULTS( "RS232_PARITY", 0xff, RS232_PARITY_EVEN )
 	DEVICE_INPUT_DEFAULTS( "RS232_STOPBITS", 0xff, RS232_STOPBITS_1 )
@@ -186,7 +186,7 @@ INPUT_PORTS_END
 void pulsar_state::machine_reset()
 {
 
-	m_rom_in_map = true;
+	m_bank1->set_entry(1);
 	m_rtc->cs_w(1); // always enabled
 
 	address_space &program = m_maincpu->space(AS_PROGRAM);
@@ -210,7 +210,8 @@ void pulsar_state::machine_reset()
 void pulsar_state::machine_start()
 {
 	// register for savestates
-	save_item(NAME(m_rom_in_map));
+	m_bank1->configure_entry(0, m_ram+0xf800);
+	m_bank1->configure_entry(1, m_rom);
 }
 
 void pulsar_state::pulsar(machine_config &config)
@@ -250,8 +251,8 @@ void pulsar_state::pulsar(machine_config &config)
 	brg.ft_handler().append("dart", FUNC(z80dart_device::rxcb_w));
 
 	FD1797(config, m_fdc, 4_MHz_XTAL / 2);
-	FLOPPY_CONNECTOR(config, "fdc:0", pulsar_floppies, "flop", floppy_image_device::default_floppy_formats).enable_sound(true);
-	FLOPPY_CONNECTOR(config, "fdc:1", pulsar_floppies, "flop", floppy_image_device::default_floppy_formats).enable_sound(true);
+	FLOPPY_CONNECTOR(config, "fdc:0", pulsar_floppies, "flop", floppy_image_device::default_mfm_floppy_formats).enable_sound(true);
+	FLOPPY_CONNECTOR(config, "fdc:1", pulsar_floppies, "flop", floppy_image_device::default_mfm_floppy_formats).enable_sound(true);
 }
 
 /* ROM definition */

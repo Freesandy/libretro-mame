@@ -1,5 +1,5 @@
 --
--- Copyright 2010-2020 Branimir Karadzic. All rights reserved.
+-- Copyright 2010-2021 Branimir Karadzic. All rights reserved.
 -- License: https://github.com/bkaradzic/bx#license-bsd-2-clause
 --
 
@@ -101,6 +101,7 @@ function toolchain(_buildDir, _subDir)
 	elseif _OPTIONS["PLATFORM"]:find("64", -2) then
 		androidPlatform = "android-24"
 	end
+	androidPlatformNumber = androidPlatform:sub(9)
 
 	local iosPlatform = ""
 	if _OPTIONS["with-ios"] then
@@ -884,7 +885,6 @@ function toolchain(_buildDir, _subDir)
 			"c++_static",
 			"c++abi",
 			"stdc++",
-			"android_support"
 		}
 		buildoptions_c {
 			"-Wno-strict-prototypes",
@@ -895,7 +895,6 @@ function toolchain(_buildDir, _subDir)
 			"-funwind-tables",
 			"-fstack-protector-strong",
 			"-no-canonical-prefixes",
-			"-fno-integrated-as",
 			"-Wunused-value",
 			"-Wundef",
 			"-Wno-cast-align",
@@ -915,30 +914,29 @@ function toolchain(_buildDir, _subDir)
 	configuration { "android-arm" }
 			libdirs {
 				"$(ANDROID_NDK_ROOT)/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a",
-				"$(ANDROID_NDK_ROOT)/platforms/" .. androidPlatform .. "/arch-arm/usr/lib",
+				"$(ANDROID_NDK_LLVM)/sysroot/usr/lib/arm-linux-androideabi/" .. androidPlatformNumber,
 			}
 			includedirs {
-				--  LIBRETRO: don't mess with NDK includir order
-				-- "$(ANDROID_NDK_ROOT)/sysroot/usr/include/arm-linux-androideabi",
 			}
 			buildoptions {
 				"-gcc-toolchain $(ANDROID_NDK_ARM)",
-				"-target armv7-none-linux-androideabi",
+				"-target armv7-linux-androideabi" .. androidPlatformNumber,
 				"-march=armv7-a",
 				"-mfloat-abi=softfp",
 				"-mfpu=vfpv3-d16",
 				"-mthumb",
 			}
 			links {
+				"android_support",
 				"unwind",
 				"gcc",
 			}
 			linkoptions {
 				"-gcc-toolchain $(ANDROID_NDK_ARM)",
-				"--sysroot=$(ANDROID_NDK_ROOT)/platforms/" .. androidPlatform .. "/arch-arm",
-				"$(ANDROID_NDK_ROOT)/platforms/" .. androidPlatform .. "/arch-arm/usr/lib/crtbegin_so.o",
-				"$(ANDROID_NDK_ROOT)/platforms/" .. androidPlatform .. "/arch-arm/usr/lib/crtend_so.o",
-				"-target armv7-none-linux-androideabi",
+				"--sysroot=$(ANDROID_NDK_LLVM)/sysroot/usr/lib/arm-linux-androideabi/" .. androidPlatformNumber,
+				"$(ANDROID_NDK_LLVM)/sysroot/usr/lib/arm-linux-androideabi/" .. androidPlatformNumber .. "/crtbegin_so.o",
+				"$(ANDROID_NDK_LLVM)/sysroot/usr/lib/arm-linux-androideabi/" .. androidPlatformNumber .. "/crtend_so.o",
+				"-target armv7-linux-androideabi" .. androidPlatformNumber,
 				"-march=armv7-a",
 				"-mthumb",
 			}
@@ -946,21 +944,25 @@ function toolchain(_buildDir, _subDir)
 	configuration { "android-arm64" }
 			libdirs {
 				"$(ANDROID_NDK_ROOT)/sources/cxx-stl/llvm-libc++/libs/arm64-v8a",
-				"$(ANDROID_NDK_ROOT)/platforms/" .. androidPlatform .. "/arch-arm64/usr/lib64",
+				"$(ANDROID_NDK_LLVM)/sysroot/usr/lib/aarch64-linux-android/" .. androidPlatformNumber,
 			}
 			includedirs {
-				"$(ANDROID_NDK_ROOT)/sysroot/usr/include/aarch64-linux-android",
 			}
 			buildoptions {
 				"-gcc-toolchain $(ANDROID_NDK_ARM64)",
-				"-target aarch64-none-linux-android",
+				"-target aarch64-linux-android" .. androidPlatformNumber,
+				"-march=armv8-a",
+			}
+			links {
+				"gcc",
 			}
 			linkoptions {
 				"-gcc-toolchain $(ANDROID_NDK_ARM64)",
-				"--sysroot=$(ANDROID_NDK_ROOT)/platforms/" .. androidPlatform .. "/arch-arm64",
-				"$(ANDROID_NDK_ROOT)/platforms/" .. androidPlatform .. "/arch-arm64/usr/lib/crtbegin_so.o",
-				"$(ANDROID_NDK_ROOT)/platforms/" .. androidPlatform .. "/arch-arm64/usr/lib/crtend_so.o",
-				"-target aarch64-none-linux-android",
+				"--sysroot=$(ANDROID_NDK_LLVM)/sysroot/usr/lib/aarch64-linux-android/" .. androidPlatformNumber,
+				"$(ANDROID_NDK_LLVM)/sysroot/usr/lib/aarch64-linux-android/" .. androidPlatformNumber .. "/crtbegin_so.o",
+				"$(ANDROID_NDK_LLVM)/sysroot/usr/lib/aarch64-linux-android/" .. androidPlatformNumber .. "/crtend_so.o",
+				"-target aarch64-linux-android" .. androidPlatformNumber,
+				"-march=armv8-a",
 			}
 
 	configuration { "android-x86" }
@@ -988,21 +990,24 @@ function toolchain(_buildDir, _subDir)
 	configuration { "android-x64" }
 		libdirs {
 			"$(ANDROID_NDK_ROOT)/sources/cxx-stl/llvm-libc++/libs/x86_64",
-			"$(ANDROID_NDK_ROOT)/platforms/" .. androidPlatform .. "/arch-x86_64/usr/lib64",
+			"$(ANDROID_NDK_LLVM)/sysroot/usr/lib/x86_64-linux-android/" .. androidPlatformNumber,
 		}
 		includedirs {
-			"$(ANDROID_NDK_ROOT)/sysroot/usr/include/x86_64-linux-android",
 		}
 		buildoptions {
 			"-gcc-toolchain $(ANDROID_NDK_X64)",
-			"-target x86_64-none-linux-android",
+			"-target x86_64-linux-android" .. androidPlatformNumber,
+		}
+		links {
+			"gcc",
 		}
 		linkoptions {
 			"-gcc-toolchain $(ANDROID_NDK_X64)",
-			"-target x86_64-none-linux-android",
-			"--sysroot=$(ANDROID_NDK_ROOT)/platforms/" .. androidPlatform .. "/arch-x86_64",
-			"$(ANDROID_NDK_ROOT)/platforms/" .. androidPlatform .. "/arch-x86_64/usr/lib64/crtbegin_so.o",
-			"$(ANDROID_NDK_ROOT)/platforms/" .. androidPlatform .. "/arch-x86_64/usr/lib64/crtend_so.o",
+			"-target x86_64-linux-android" .. androidPlatformNumber,
+			"--sysroot=$(ANDROID_NDK_LLVM)/sysroot/usr/lib/x86_64-linux-android/" .. androidPlatformNumber,
+			"$(ANDROID_NDK_LLVM)/sysroot/usr/lib/x86_64-linux-android/" .. androidPlatformNumber .. "/crtbegin_so.o",
+			"$(ANDROID_NDK_LLVM)/sysroot/usr/lib/x86_64-linux-android/" .. androidPlatformNumber .. "/crtend_so.o",
+			"-target x86_64-linux-android" .. androidPlatformNumber,
 		}
 
 	configuration { "asmjs" }
@@ -1056,27 +1061,39 @@ function toolchain(_buildDir, _subDir)
 	configuration { "pnacl", "Release" }
 		libdirs { "$(NACL_SDK_ROOT)/lib/pnacl/Release" }
 
-	configuration { "osx*", "x32" }
+	configuration { "osx*", "x32", "not arm64" }
 		objdir (_buildDir .. "osx_clang" .. "/obj")
 		buildoptions {
 			"-m32",
 		}
-	configuration { "osx*", "x32", "Release" }
+	configuration { "osx*", "x32", "not arm64", "Release" }
 		targetdir (_buildDir .. "osx_clang" .. "/bin/x32/Release")
 
-	configuration { "osx*", "x32", "Debug" }
+	configuration { "osx*", "x32", "not arm64", "Debug" }
 		targetdir (_buildDir .. "osx_clang" .. "/bin/x32/Debug")
 
-	configuration { "osx*", "x64" }
+	configuration { "osx*", "x64", "not arm64" }
 		objdir (_buildDir .. "osx_clang" .. "/obj")
 		buildoptions {
 			"-m64", "-DHAVE_IMMINTRIN_H=1",
 		}
 
-	configuration { "osx*", "x64", "Release" }
+	configuration { "osx*", "x64", "not arm64", "Release" }
 		targetdir (_buildDir .. "osx_clang" .. "/bin/x64/Release")
 
-	configuration { "osx*", "x64", "Debug" }
+	configuration { "osx*", "x64", "not arm64", "Debug" }
+		targetdir (_buildDir .. "osx_clang" .. "/bin/x64/Debug")
+
+	configuration { "osx*", "arm64" }
+		objdir (_buildDir .. "osx_clang" .. "/obj")
+		buildoptions {
+			"-m64", "-DHAVE_IMMINTRIN_H=0", "-DSDL_DISABLE_IMMINTRIN_H=1", "-DHAVE_SSE=0"
+		}
+
+	configuration { "osx*", "arm64", "Release" }
+		targetdir (_buildDir .. "osx_clang" .. "/bin/x64/Release")
+
+	configuration { "osx*", "arm64", "Debug" }
 		targetdir (_buildDir .. "osx_clang" .. "/bin/x64/Debug")
 
 	configuration { "ios-arm" }

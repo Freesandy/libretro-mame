@@ -464,7 +464,7 @@ uint64_t h8_sci_device::internal_update(uint64_t current_time)
 
 	case CLKM_EXTERNAL_ASYNC:
 	case CLKM_EXTERNAL_SYNC:
-		break;;
+		break;
 	}
 	if(event) {
 		attotime ctime = machine().time();
@@ -609,6 +609,10 @@ void h8_sci_device::tx_dropped_edge()
 		ssr |= SSR_TEND;
 		if(scr & SCR_TEIE)
 			intc->internal_interrupt(tei_int);
+
+		// if there's more to send, start the transmitter
+		if ((scr & SCR_TE) && !(ssr & SSR_TDRE))
+			tx_start();
 		break;
 
 	default:

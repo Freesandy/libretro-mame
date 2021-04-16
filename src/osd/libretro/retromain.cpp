@@ -18,6 +18,7 @@
 #include "emu.h"
 #include "emuopts.h"
 #include "strconv.h"
+#include "corestr.h"
 
 // OSD headers
 #include "video.h"
@@ -170,7 +171,7 @@ int mmain(int argc, char *argv[])
 #endif
 
 	{
-		retro_global_osd= global_alloc(retro_osd_interface(retro_global_options));
+		retro_global_osd =  new retro_osd_interface(retro_global_options);
 		retro_global_osd->register_options();
 		res =  emulator_info::start_frontend(retro_global_options, *retro_global_osd,args);
 		return res;

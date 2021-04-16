@@ -34,7 +34,7 @@ typedef uintptr_t HashT;
 
 #define OSDWORK_CALLBACK(name)  void *name(void *param, ATTR_UNUSED int threadid)
 
-class retro_window_info : public osd_window
+class retro_window_info : public osd_window_t<void *>
 {
 public:
 	retro_window_info(running_machine &a_machine, int index, std::shared_ptr<osd_monitor_info> a_monitor,
@@ -48,7 +48,6 @@ public:
 	void toggle_full_screen();
 	void modify_prescale(int dir);
 	void resize(int32_t width, int32_t height);
-	void destroy() override;
 
 	void capture_pointer() override;
 	void release_pointer() override;
@@ -60,12 +59,6 @@ public:
 	osd_dim get_size() override;
 
 	int xy_to_render_target(int x, int y, int *xt, int *yt);
-
-	running_machine &machine() const override { return m_machine; }
-	osd_monitor_info *monitor() const override { return m_monitor.get(); }
-	int fullscreen() const override { return m_fullscreen; }
-
-	render_target *target() override { return m_target; }
 
 	int prescale() const { return m_prescale; }
 
@@ -83,7 +76,6 @@ private:
 
 	// rendering info
 	osd_event           m_rendered_event;
-	render_target *     m_target;
 
 	// Original display_mode
 	RETRO_DM_Wrapper      *m_original_mode;
@@ -104,9 +96,6 @@ private:
 	void update_cursor_state();
 	osd_dim pick_best_mode();
 	void set_fullscreen(int afullscreen) { m_fullscreen = afullscreen; }
-
-	// Pointer to machine
-	running_machine &   m_machine;
 
 	// monitor info
 	std::shared_ptr<osd_monitor_info>  m_monitor;

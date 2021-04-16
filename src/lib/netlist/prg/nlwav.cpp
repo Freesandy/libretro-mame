@@ -1,10 +1,10 @@
-// license:GPL-2.0+
+// license:BSD-3-Clause
 // copyright-holders:Couriersud
-#include "netlist/plib/pstring.h"
-//#include "netlist/nl_setup.h"
-#include "netlist/plib/pmain.h"
-#include "netlist/plib/ppmf.h"
-#include "netlist/plib/pstream.h"
+#include "plib/pstring.h"
+#include "plib/pmain.h"
+#include "plib/ppmf.h"
+#include "plib/pstream.h"
+#include "plib/pstrutil.h"
 
 #include <cstdio>
 
@@ -76,16 +76,14 @@ public:
 	template <typename T>
 	void write(const T &val)
 	{
-		static_assert(sizeof(std::ostream::char_type) == 1, "char_type size must be 1");
-		const auto *ptr(reinterpret_cast<const std::ostream::char_type *>(&val));
-		m_f.write(ptr, sizeof(T));
+		plib::ostream_write(m_f, &val, 1);
 	}
 
 	template <typename T>
 	void write_sample_int(double sample)
 	{
-		const auto mmax(static_cast<double>(plib::numeric_limits<T>::max()));
-		const auto mmin(static_cast<double>(plib::numeric_limits<T>::min()));
+		constexpr auto mmax(static_cast<double>(plib::numeric_limits<T>::max()));
+		constexpr auto mmin(static_cast<double>(plib::numeric_limits<T>::min()));
 
 		sample *= mmax;
 		sample = std::max(mmin, sample);
@@ -202,7 +200,7 @@ public:
 		{
 			if (m_e[i].need_more)
 			{
-				pstring line;
+				putf8string line;
 				m_e[i].eof = !r[i].readline(line);
 				if (!m_e[i].eof)
 				{
@@ -249,6 +247,7 @@ public:
 			more = readmore(readers);
 		}
 	}
+
 
 private:
 	callback_type m_cb;
@@ -492,7 +491,8 @@ public:
 private:
 	void write(const pstring &line)
 	{
-		m_fo.write(line.c_str(), static_cast<std::streamsize>(plib::strlen(line.c_str())));
+		const putf8string u8line(line);
+		m_fo.write(u8line.c_str(), static_cast<std::streamsize>(plib::strlen(u8line.c_str())));
 	}
 
 	std::size_t m_channels;
@@ -554,7 +554,8 @@ public:
 private:
 	void write(const pstring &line)
 	{
-		m_fo.write(line.c_str(), static_cast<std::streamsize>(plib::strlen(line.c_str())));
+		const putf8string u8line(line);
+		m_fo.write(u8line.c_str(), static_cast<std::streamsize>(plib::strlen(u8line.c_str())));
 	}
 
 	double m_last_time;
@@ -783,8 +784,8 @@ int nlwav_app::execute()
 	{
 		pout(
 			"nlwav (netlist) 0.1\n"
-			"Copyright (C) 2020 Couriersud\n"
-			"License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>.\n"
+			"Copyright (C) 2021 Couriersud\n"
+			"License BSD-3-Clause\n"
 			"This is free software: you are free to change and redistribute it.\n"
 			"There is NO WARRANTY, to the extent permitted by law.\n\n"
 			"Written by Couriersud.\n");

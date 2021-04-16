@@ -2,14 +2,7 @@
 
 Before sending bug reports to the upstream bug tracker, make sure the bugs are reproducible in the latest standalone release.
 
-Libretro MAME core build status:
-
-| OS/Compiler           | Status        |
-| --------------------- |:-------------:|
-| Linux GCC / OSX Clang | [![Build Status](https://travis-ci.org/libretro/mame.svg?branch=master)](https://travis-ci.org/libretro/mame) |
-
-To build libretro MAME core from source you need to use `Makefile.libretro` make
-file:
+To build libretro MAME core from source you need to use `Makefile.libretro` make file:
 
 ```
 make -f Makefile.libretro
@@ -20,18 +13,6 @@ make -f Makefile.libretro
 # **MAME** #
 
 [![Join the chat at https://gitter.im/mamedev/mame](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mamedev/mame?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-Build status for tiny build only, containing just core parts of project:
-
-| OS/Compiler        | Status           | 
-| ------------- |:-------------:| 
-|Linux GCC / OSX Clang| [![Build Status](https://travis-ci.org/mamedev/mame.svg?branch=master)](https://travis-ci.org/mamedev/mame) |
-|Windows MinGW | [![Build Status](https://tea-ci.org/api/badges/mamedev/mame/status.svg)](https://tea-ci.org/mamedev/mame) |
-|Windows MSVC | [![Build status](https://ci.appveyor.com/api/projects/status/te0qy56b72tp5kmo?svg=true)](https://ci.appveyor.com/project/startaq/mame) |
-
-Static analysis status for entire build (except for third-party parts of project):
-
-[![Coverity Scan Status](https://scan.coverity.com/projects/5727/badge.svg?flat=1)](https://scan.coverity.com/projects/mame-emulator)
 
 What is MAME?
 =============
@@ -73,12 +54,12 @@ Visual Studio builds are also possible, but you still need [build environment](h
 In order to generate solution and project files just run:
 
 ```
-make vs2017
+make vs2019
 ```
 or use this command to build it directly using msbuild
 
 ```
-make vs2017 MSBUILD=1
+make vs2019 MSBUILD=1
 ```
 
 
@@ -119,7 +100,7 @@ is required to use the "MAME" name, logo, or wordmark.
 <img align="right" src="http://opensource.org/trademarks/opensource/OSI-Approved-License-100x137.png">
 </a>
 
-    Copyright (C) 1997-2020  MAMEDev and contributors
+    Copyright (C) 1997-2021  MAMEDev and contributors
 
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License version 2, as provided in

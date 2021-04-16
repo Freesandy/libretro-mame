@@ -94,11 +94,11 @@
 
 #include "cpu/m68000/m68000.h"
 #include "cpu/z80/z80.h"
-#include "sound/2203intf.h"
-#include "sound/2612intf.h"
 #include "sound/okim6295.h"
 #include "sound/rf5c68.h"
 #include "sound/ym2151.h"
+#include "sound/ym2203.h"
+#include "sound/ym2612.h"
 #include "speaker.h"
 
 
@@ -4105,7 +4105,7 @@ void segas1x_bootleg_state::init_beautyb()
 /* Sys18 */
 void segas1x_bootleg_state::init_shdancbl()
 {
-	uint8_t *mem = m_soundcpu_region->base();;
+	uint8_t *mem = m_soundcpu_region->base();
 
 	/* Copy first 32K of IC45 to Z80 address space */
 	memcpy(mem, mem + 0x10000, 0x8000);
